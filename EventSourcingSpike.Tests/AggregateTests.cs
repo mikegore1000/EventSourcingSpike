@@ -30,12 +30,10 @@ namespace EventSourcingSpike.Tests
             Assert.That(subject.UndispatchedEvents.First(), Is.InstanceOf<TestEvent>());
         }
 
-        private class TestAggregate : Projection
+        private class TestAggregate : EventSourcedAggregate
         {
-            internal TestAggregate(IEnumerable<object> events)
+            internal TestAggregate(IEnumerable<object> events) : base(events)
             {
-                Project<TestEvent>(e => Name = e.Name);
-                Apply(events);
             }
 
             // requires it.
@@ -46,6 +44,16 @@ namespace EventSourcingSpike.Tests
             public void SetName(string name)
             {
                 Append(new TestEvent(name));
+            }
+
+            protected override void Apply(dynamic @event)
+            {
+                this.When(@event);
+            }
+
+            private void When(TestEvent e)
+            {
+                Name = e.Name;
             }
         }
 
