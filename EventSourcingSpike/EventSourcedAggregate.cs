@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace EventSourcingSpike
 {
@@ -9,6 +8,8 @@ namespace EventSourcingSpike
 
         protected EventSourcedAggregate(IEnumerable<object> events)
         {
+            Guard.IsNotNull(events, nameof(events));
+
             foreach (var e in events)
             {
                 Apply(e);
@@ -26,6 +27,6 @@ namespace EventSourcingSpike
             Apply(@event);
         }
 
-        protected abstract void Apply(dynamic @event);
+        protected abstract void Apply(object @event);
     }
 }

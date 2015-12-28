@@ -1,33 +1,31 @@
 ﻿using System.Linq;
-using NUnit.Framework;
 using System.Collections.Generic;
+using Xunit;
 
 namespace EventSourcingSpike.Tests
 {
-    [TestFixture]
     public class AggregateTests
     {
-        [Test]
+        [Fact]
         public void Given_A_Non_Empty_Stream_The_Events_Are_Replayed_On_The_Aggregate()
         {
-            object[] stream = new[] { new TestEvent("Bob") };
+            object[] stream = { new TestEvent("Bob") };
             var subject = new TestAggregate(stream);
 
-            Assert.That(subject.Name, Is.EqualTo("Bob"));
+            Assert.Equal("Bob", subject.Name);
         }
 
-        [Test]
+        [Fact]
         public void Given_An_Empty_Stream_Ensure_The_Corrected_Event_Is_Added_By_The_Aggregate()
         {
-            object[] stream = new object[] { };
+            object[] stream = { };
             var subject = new TestAggregate(stream);
 
             subject.SetName("Bill");
 
-            Assert.That(subject.Name, Is.EqualTo("Bill"));
-
-            Assert.That(subject.UndispatchedEvents.Count(), Is.EqualTo(1));
-            Assert.That(subject.UndispatchedEvents.First(), Is.InstanceOf<TestEvent>());
+            Assert.Equal("Bill", subject.Name);
+            Assert.Equal(1, subject.UndispatchedEvents.Count());
+            Assert.IsType<TestEvent>(subject.UndispatchedEvents.First());
         }
 
         private class TestAggregate : EventSourcedAggregate
@@ -46,9 +44,9 @@ namespace EventSourcingSpike.Tests
                 Append(new TestEvent(name));
             }
 
-            protected override void Apply(dynamic @event)
+            protected override void Apply(object @event)
             {
-                this.When(@event);
+                this.When((dynamic)@event);
             }
 
             private void When(TestEvent e)
